@@ -1,71 +1,91 @@
 import styled from "@emotion/styled";
-import ArrowBack from "@mui/icons-material/ArrowBack";
 import Link from "next/link";
 import { format } from "date-fns";
-import { ChannelInfo } from "@/model/Channel";
+import { ArrowBack } from "@mui/icons-material";
 import usePageTitle from "src/hooks/usePageTitle";
-
 type Props = {
-  readonly channel: ChannelInfo;
-  readonly content: string;
+  content: string;
+  description?: string;
+  name?: string;
+  refs?: { href: string; name: string }[];
+  since?: string;
+  topic?: string;
 };
 
-export default function Channel({ channel, content }: Props) {
-  const { description, name, refs, since, topic } = channel;
+export default function Channel({
+  content,
+  description,
+  name,
+  refs,
+  since,
+  topic,
+}: Props) {
   usePageTitle(name);
   return (
-    <Wrap>
-      <div>
+    <ContentWrap>
+      <TitleWrap>
         <Title>
           <Back href="./">
             <ArrowBack />
           </Back>
-          <Name>{name}</Name>
+          {name ? <Name>{name}</Name> : ""}
           {topic ? <Topic>{topic}</Topic> : ""}
         </Title>
-        <i>since: </i>
-        {format(new Date(since), "yyyy/MM/dd")}
+        {since ? (
+          <>
+            <i>since: </i>
+            {format(new Date(since), "yyyy/MM/dd")}
+          </>
+        ) : (
+          ""
+        )}
         <br />
         {description ? `「${description}」` : ""}
-      </div>
+      </TitleWrap>
       <div dangerouslySetInnerHTML={{ __html: content }}></div>
       <ReferenceWrap>
-        {refs.map(({ href, name }) => {
+        {refs?.map(({ href, name }) => {
           return (
             <Reference key={name}>
-              <Link href={href}>{name}</Link>
+              <Link target="_blank" rel="noopener noreferrer" href={href}>
+                {name}
+              </Link>
             </Reference>
           );
         })}
       </ReferenceWrap>
-    </Wrap>
+    </ContentWrap>
   );
 }
 
-const Wrap = styled.div`
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  padding: 4px 16px;
-`;
+const ContentWrap = styled.div`
+  display: flex;
+  flex-direction: column;
 
-const Title = styled.div`
-  margin-top: 0.83em;
-
-  @media screen and (min-width: 450px) {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  @media screen and (max-width: 900px) {
+    min-width: inherit;
+    width: 100%;
   }
 `;
 
-const Back = styled(Link)`
-  color: #333;
+const TitleWrap = styled.header`
+  text-align: right;
 
-  @media screen and (min-width: 450px) {
-    margin-right: 1em;
-    margin-top: 0.2em;
+  @media screen and (max-width: 900px) {
+    text-align: center;
+    margin-top: 10px;
+  }
+`;
+
+const Title = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 0.83em;
+  text-align: left;
+  margin-left: 2em;
+  @media screen and (max-width: 900px) {
+    margin-left: 0;
   }
 `;
 
@@ -85,14 +105,11 @@ const Topic = styled.div`
 
   &:before {
     color: gray;
-    position: relative;
     bottom: 2px;
 
-    @media screen and (min-width: 450px) {
-      margin-left: 1em;
-      margin-right: 1em;
-      content: "|";
-    }
+    margin-right: 1em;
+    margin-left: 5px;
+    content: "|";
   }
 `;
 
@@ -116,5 +133,16 @@ const Reference = styled.span`
   &:after {
     content: ",";
     margin-right: 0.3em;
+  }
+`;
+
+const Back = styled(Link)`
+  display: none;
+  color: #333;
+
+  @media screen and (max-width: 900px) {
+    display: inline-block;
+    margin-right: 1em;
+    margin-top: 0.2em;
   }
 `;
